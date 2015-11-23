@@ -47,7 +47,7 @@ int main(void)
      * Bit in the register for port F = 5
      *
      * Operation should be:
-     * DPTR(0x400FE000 + 0x608) |= 1 << 5;
+     * DPTR(0x400FE000 + 0x608) |= (1 << 5);
      *
      * Equivalent DriverLib call: SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
      */
@@ -56,18 +56,52 @@ int main(void)
     /*
      * Select the GPIO function for GPIO port F pins 1,2,3 (onboard R,G,B LEDs)
      *     [672, 10.5-R10].
+     *
+     * From the datasheet:
+     * Base address for GPIO port F (APB) = 0x40025000
+     * Address offset for register 10 (GPIOAFSEL, GPIO Alternate Function
+     *     Select) = 0x420
+     * Bits in the register for port F pins 1,2,3 = 1,2,3
+     *
+     * 0 = GPIO function
+     * 1 = Alternate function
+     *
+     * Operation should be:
+     * DPTR(0x40025000 + 0x420) &= ~((1 << 1) | (1 << 2) | (1 << 3));
      */
     DPTR(0x40025420) &= ~0x0000000E;
 
     /*
      * Select the 2-mA drive strength for GPIO port F pins 1,2,3 (onboard R,G,B
      *     LEDs) [673, 10.5-R11].
+     *
+     * From the datasheet:
+     * Base address for GPIO port F (APB) = 0x40025000
+     * Address offset for register 11 (GPIODR2R, GPIO 2-mA Drive Select) =
+     *     0x500
+     * Bits in the register for port F pins 1,2,3 = 1,2,3
+     *
+     * Operation should be:
+     * DPTR(0x40025000 + 0x500) |= ((1 << 1) | (1 << 2) | (1 << 3));
      */
     DPTR(0x40025500) |= 0x0000000E;
 
     /*
      * Disable pull-up and pull-down resistors for GPIO port F pins 1,2,3
      *     (onboard R,G,B LEDs) [677, 10.5-R15], [679, 10.5-R16].
+     *
+     * From the datasheet:
+     * Base address for GPIO port F (APB) = 0x40025000
+     * Address offset for register 15 (GPIOPUR, GPIO Pull-Up Select) = 0x510
+     * Address offset for register 16 (GPIOPDR, GPIO Pull-Down Select) = 0x514
+     * Bits in the register for port F pins 1,2,3 = 1,2,3
+     *
+     * 0 = Resistor disabled
+     * 1 = Resistor enabled
+     *
+     * Operations should be:
+     * DPTR(0x40025000 + 0x510) &= ~((1 << 1) | (1 << 2) | (1 << 3));
+     * DPTR(0x40025000 + 0x514) &= ~((1 << 1) | (1 << 2) | (1 << 3));
      */
     DPTR(0x40025510) &= ~0x0000000E;
     DPTR(0x40025514) &= ~0x0000000E;
@@ -75,16 +109,40 @@ int main(void)
     /*
      * Disable slew rate control for GPIO port F pins 1,2,3 (onboard R,G,B
      *     LEDs) [681, 10.5-R17].
+     *
+     * From the datasheet:
+     * Base address for GPIO port F (APB) = 0x40025000
+     * Address offset for register 17 (GPIOSLR, GPIO Slew Rate Control Select)
+     *     = 0x518
+     * Bits in the register for port F pins 1,2,3 = 1,2,3
+     *
+     * 0 = SRC disabled
+     * 1 = SRC enabled
+     *
+     * Operation should be:
+     * DPTR(0x40025000 + 0x518) &= ~((1 << 1) | (1 << 2) | (1 << 3));
      */
     DPTR(0x40025518) &= ~0x0000000E;
 
     /*
      * Enable the digital functions for GPIO port F pins 1,2,3 (onboard R,G,B
      *     LEDs) [682, 10.5-R18].
+     *
+     * From the datasheet:
+     * Base address for GPIO port F (APB) = 0x40025000
+     * Address offset for register 18 (GPIODEN, GPIO Digital Enable) = 0x51C
+     * Bits in the register for port F pins 1,2,3 = 1,2,3
+     *
+     * Operation should be:
+     * DPTR(0x40025000 + 0x51C) |= ((1 << 1) | (1 << 2) | (1 << 3));
      */
     DPTR(0x4002551C) |= 0x0000000E;
 
-    //GPIOPadConfigSet(GPIO_PORTF_BASE, 0x0F, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
+    /*
+     * Equivalent DriverLib call for the preceeding GPIO configuration:
+     *     GPIOPadConfigSet(GPIO_PORTF_BASE, 0x0F, GPIO_STRENGTH_2MA,
+     *                      GPIO_PIN_TYPE_STD);
+     */
 
     /*
      * Set pin direction for GPIO port F pins 1,2,3 (onboard R,G,B LEDs) to
