@@ -19,10 +19,10 @@
  *     to complete.
  */
 __attribute__((naked))
-void delay(uint32_t cycles)
+void myDelay(uint32_t cycles)
 {
     __asm("subs R0, #1\n"
-          "bne delay\n"
+          "bne myDelay\n"
           "bx lr\n");
 }
 
@@ -199,14 +199,14 @@ int main(void)
         /*
          * Delay for a bit.
          */
-        delay(10000000ul);
+        myDelay(10000000ul);
 
         /*
          * Same business as before, but this time we write 0x00. Why?
          */
         DPTR(0x40025000 + (0x0E << 2)) = 0x00;
 
-        delay(10000000ul);
+        myDelay(10000000ul);
     }
 
     return 0;
